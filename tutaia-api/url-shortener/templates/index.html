@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}snip. — URL Shortener{% endblock %}
+{% block content %}
+
+<style>
+  .hero {
+    margin-bottom: 3.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2.8rem, 6vw, 4.8rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.0;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: var(--muted);
+    font-family: var(--mono);
+    letter-spacing: -0.01em;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  input[type="url"] {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    padding: 0.85rem 1.1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 0;
+  }
+
+  input[type="url"]::placeholder { color: var(--muted); }
+
+  input[type="url"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(232,255,71,0.1);
+  }
+
+  button {
+    background: var(--accent);
+    color: #0c0c0e;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.85rem 1.6rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  button:hover { opacity: 0.88; }
+  button:active { transform: scale(0.98); }
+
+  .error {
+    margin-top: 0.9rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--danger);
+  }
+
+  .result {
+    margin-top: 1.5rem;
+    padding: 1.2rem 1.4rem;
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,255,71,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    animation: fadeup 0.3s ease;
+  }
+
+  @keyframes fadeup {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .result-url {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+    word-break: break-all;
+    text-decoration: none;
+  }
+
+  .result-url:hover { text-decoration: underline; }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid rgba(232,255,71,0.3);
+    color: var(--accent);
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
+
+  .copy-btn:hover {
+    background: var(--accent-dim);
+    opacity: 1;
+  }
+
+  .hint {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .hint-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .hint-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+</style>
+
+<div class="hero">
+  <div class="tag">URL Shortener</div>
+  <h1>Long URLs,<br><em>cut short.</em></h1>
+  <p class="subtitle">Paste a URL. Get a snip. Track the clicks.</p>
+</div>
+
+<div class="card">
+  <form method="POST" action="/">
+    <div class="input-row">
+      <input
+        type="url"
+        name="url"
+        placeholder="https://your-very-long-url.com/goes/here"
+        autocomplete="off"
+        spellcheck="false"
+        required
+      />
+      <button type="submit">Shorten →</button>
+    </div>
+    {% if error %}
+      <p class="error">⚠ {{ error }}</p>
+    {% endif %}
+  </form>
+
+  {% if short_url %}
+  <div class="result">
+    <div>
+      <div class="result-label">Your short link</div>
+      <a class="result-url" href="{{ short_url }}" target="_blank">{{ short_url }}</a>
+    </div>
+    <button class="copy-btn" onclick="copyUrl('{{ short_url }}', this)">Copy</button>
+  </div>
+  {% endif %}
+</div>
+
+<div class="hint">
+  <div class="hint-item"><div class="hint-dot"></div> Duplicates reuse the same code</div>
+  <div class="hint-item"><div class="hint-dot"></div> Clicks tracked automatically</div>
+  <div class="hint-item"><div class="hint-dot"></div> <a href="/stats" style="color:inherit;">View all links →</a></div>
+</div>
+
+<script>
+  function copyUrl(url, btn) {
+    navigator.clipboard.writeText(url).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+</script>
+{% endblock %}

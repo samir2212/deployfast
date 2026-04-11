@@ -1,0 +1,43 @@
+# ─── Secrets & credentials ───────────────────────
+.env
+.env.*
+!.env.example
+*.tfvars
+!*.tfvars.example
+
+# ─── Terraform ────────────────────────────────────
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ─── OS / IDE ─────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ─── Tool caches (not source code) ───────────────
+.claude/
+.qodo/
+
+# ─── Frontend (tutaia-web) ────────────────────────
+tutaia-web/node_modules/
+tutaia-web/dist/
+tutaia-web/.env*
+!tutaia-web/.env.example
+
+# ─── Backend build artefacts (tutaia-api) ─────────
+tutaia-api/__pycache__/
+tutaia-api/*.pyc
+tutaia-api/.venv/
+tutaia-api/venv/
+tutaia-api/*.zip

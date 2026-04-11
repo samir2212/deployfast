@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}snip. — Stats{% endblock %}
+{% block content %}
+
+<style>
+  .page-header {
+    margin-bottom: 3rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.0;
+    margin-bottom: 0.6rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .summary-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.6rem;
+    min-width: 150px;
+    flex: 1;
+  }
+
+  .stat-card .value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-card .label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  thead tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.9rem 1.4rem;
+    text-align: left;
+  }
+
+  td {
+    padding: 0.95rem 1.4rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr {
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover {
+    background: rgba(255,255,255,0.025);
+  }
+
+  .code-cell {
+    font-family: var(--mono);
+    font-weight: 500;
+  }
+
+  .code-cell a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .code-cell a:hover { text-decoration: underline; }
+
+  .url-cell {
+    max-width: 360px;
+  }
+
+  .url-cell a {
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .url-cell a:hover { color: var(--accent); }
+
+  .clicks-cell {
+    font-family: var(--mono);
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .clicks-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .clicks-bar {
+    height: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    min-width: 2px;
+    transition: width 0.4s ease;
+    opacity: 0.8;
+  }
+
+  .date-cell {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .empty {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.9rem;
+  }
+
+  .empty a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+</style>
+
+<div class="page-header">
+  <div class="tag">Dashboard</div>
+  <h1>Link Stats</h1>
+  <p class="subtitle">All shortened URLs and their performance.</p>
+</div>
+
+<div class="summary-row">
+  <div class="stat-card">
+    <div class="value">{{ urls | length }}</div>
+    <div class="label">Total Links</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">{{ total_clicks }}</div>
+    <div class="label">Total Clicks</div>
+  </div>
+</div>
+
+<div class="table-wrap">
+  {% if urls %}
+  <table>
+    <thead>
+      <tr>
+        <th>Short Code</th>
+        <th>Original URL</th>
+        <th>Clicks</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set max_clicks = urls[0].clicks if urls[0].clicks > 0 else 1 %}
+      {% for row in urls %}
+      <tr>
+        <td class="code-cell">
+          <a href="{{ host }}{{ row.short_code }}" target="_blank">/{{ row.short_code }}</a>
+        </td>
+        <td class="url-cell">
+          <a href="{{ row.original_url }}" target="_blank" title="{{ row.original_url }}">
+            {{ row.original_url }}
+          </a>
+        </td>
+        <td class="clicks-cell">
+          <div class="clicks-bar-wrap">
+            <span>{{ row.clicks }}</span>
+            <div class="clicks-bar" style="width: {{ [((row.clicks / max_clicks) * 80)|int, 2]|max }}px"></div>
+          </div>
+        </td>
+        <td class="date-cell">
+          {{ row.created_at[:10] if row.created_at else '—' }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    No links yet. <a href="/">Create your first one →</a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
